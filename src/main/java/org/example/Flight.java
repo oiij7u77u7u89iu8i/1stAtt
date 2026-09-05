@@ -2,18 +2,21 @@ package org.example;
 
 
 import java.sql.Time;
-import java.util.Locale;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+import static org.example.ProjectClock.now;
 
 public class Flight {
     private String id;
-    private Time timeOut;
-    private Time timeIn ;
+    private Instant timeOut;
+    private Instant timeIn;
     private Airport placeOut;
-    private Airport placein;
-    private int timeInAir;
+    private Airport placeIn;
     private Seats count;
 
-    public static class Seats{
+    public class Seats{
         private int firstClass;
         private int ecoClass;
 
@@ -32,11 +35,17 @@ public class Flight {
             return ecoClass;
         }
 
-        public void setEcoClass(int ecoClass) {
+        public void setEcoClass(int ecoClass) throws Exception{
+            if(now().isAfter(getTimeOut())){
+                throw new Exception("u r late nigga");
+            }
             this.ecoClass = ecoClass;
         }
 
-        public void setFirstClass(int firstClass) {
+        public void setFirstClass(int firstClass) throws Exception{
+            if(now().isAfter(getTimeOut())){
+                throw new Exception("u r late nigga");
+            }
             this.firstClass = firstClass;
         }
         public void sellFirstClassTickets(int count) throws Exception{
@@ -55,24 +64,29 @@ public class Flight {
             }
         }
     }
-    public Flight(Airport placeOut, Airport placein, Time timeOut, Time timeIn){
-        this.id = ;
+    public Flight(Airport placeOut, Airport placeIn, Instant timeOut, Instant timeIn, Seats seats){
+        this.id = placeOut.getCiti().toUpperCase().substring(0, 3) + placeIn.getCiti().toUpperCase().substring(0, 3) + timeIn;
         this.timeOut = timeOut;
         this.timeIn = timeIn;
-        this.placein = placein;
+        this.placeIn = placeIn;
         this.placeOut = placeOut;
+        this.count = seats;
     }
 
+
+    public Instant getTimeIn(){return timeIn;}
+    public Instant getTimeOut(){return timeOut;}
     public String getId() {return id;}
-    public int getTimeInAir() {return timeInAir;}
-    public int[] getSeats() {return count;}
-    public String getPlaceOut(){return placeOut;}
+    public Duration getTimeInAir() {return Duration.between(getTimeIn(), getTimeOut());}
+    public Seats getSeats() {return count;}
+    public Airport getPlaceOut(){return placeOut;}
+    public Airport getPlaceIn(){return placeIn;}
 
 
-    public void setTimeOut(Time timOut){
+    public void setTimeOut(Instant timOut){
         timeOut = timOut;
     }
-    public void setTimeIn(Time timIn){
+    public void setTimeIn(Instant timIn){
         timeIn = timIn;
     }
 }

@@ -7,19 +7,22 @@ import java.util.Random;
 
 public class Airport {
     private static int airportCount = 0;
-    private String id;
+    private int id;
     private ZoneId continentCity; //Asia/Tokio
     private HashMap<String, Flight> flightOut = new HashMap<>();
 
     public Airport(ZoneId continentCity){
         this.continentCity = continentCity;
-        this.id = continentCity.getId().split("/")[1] + airportCount;
+        this.id = airportCount;
         airportCount++;
     }
 
-    public String getId() {return id;}
+    public ZoneId getZoneId() { return continentCity; }
+    public int getId() {return id;}
     public String getCiti(){return continentCity.getId().split("/")[1];}
 
-    public void createFlight(String placeOut, String placein, Time timeOut, Time timeIn) {
+    public void createFlight(Airport placeOut, Airport placeIn, Time timeOut, Time timeIn, seats) {
+        Flight current = new Flight(placeOut, placeIn, timeOut, timeIn, seats);
+        flightOut.put(current.getId(), current);
     }
 }
