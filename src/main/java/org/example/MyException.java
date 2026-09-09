@@ -1,4 +1,5 @@
 package org.example;
 
-public class MyExeption {
+public class MyException extends Exception{
+
 }

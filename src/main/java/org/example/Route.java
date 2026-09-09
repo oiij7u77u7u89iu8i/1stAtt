@@ -20,9 +20,11 @@ public class Route{
                 throw new Exception("You can't get flight after flight is gone!");
             }
         }
-        this.list = list;
+        this.list = List.copyOf(list);
     }
-    public List<Flight> getList() { return list; }
+    public List<Flight> getList() { return List.copyOf(list); }
+
+    public void addList(List<Flight> newFlight){list.addAll(newFlight);}
 
 
 }

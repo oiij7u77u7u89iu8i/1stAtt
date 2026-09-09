@@ -1,9 +1,8 @@
 package org.example;
 
-import java.sql.Time;
+
 import java.time.*;
 import java.util.HashMap;
-import java.util.Random;
 
 public class Airport {
     private static int airportCount = 0;
@@ -21,8 +20,12 @@ public class Airport {
     public int getId() {return id;}
     public String getCiti(){return continentCity.getId().split("/")[1];}
 
-    public void createFlight(Airport placeOut, Airport placeIn, Time timeOut, Time timeIn, seats) {
-        Flight current = new Flight(placeOut, placeIn, timeOut, timeIn, seats);
+    public void createFlight(Airport placeIn, Instant timeOut, Instant timeIn, int seats) {
+        Flight current = new Flight(this, placeIn, timeOut, timeIn, seats);
         flightOut.put(current.getId(), current);
+    }
+    public static void createFlight(Airport placeOut, Airport placeIn, Instant timeOut, Instant timeIn, int seats) {
+        Flight current = new Flight(placeOut, placeIn, timeOut, timeIn, seats);
+        placeOut.flightOut.put(current.getId(), current);
     }
 }
