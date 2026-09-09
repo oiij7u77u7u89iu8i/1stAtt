@@ -83,9 +83,7 @@ public class Flight {
     public Airport getPlaceIn(){return placeIn;}
 
 
-    public void setTimeOut(Instant timOut){
-        timeOut = timOut;
-    }
+    public void setTimeOut(Instant timOut){timeOut = timOut;}
     public void setTimeIn(Instant timIn){
         timeIn = timIn;
     }
