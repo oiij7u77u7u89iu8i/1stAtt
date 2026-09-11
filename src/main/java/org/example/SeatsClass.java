@@ -1,9 +1,9 @@
 package org.example;
 
 public enum SeatsClass {
-    FIRST(2, 0.10),
+    FIRST(2.0, 0.10),
     BUSINESS(1.5, 0.20),
-    ECONOMY(1, 0.7);
+    ECONOMY(1.0, 0.70);
 
     private final double priceMult;
     private final double seatsMult;

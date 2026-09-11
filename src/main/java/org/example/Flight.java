@@ -27,8 +27,10 @@ public class Flight {
     }
 
 
-    public LocalDateTime getTimeIn(){return LocalDateTime.ofInstant(timeIn, placeIn.getZoneId());}
-    public LocalDateTime getTimeOut(){return LocalDateTime.ofInstant(timeOut, placeOut.getZoneId());}
+    public LocalDateTime getTimeInLocal(){return LocalDateTime.ofInstant(timeIn, placeIn.getZoneId());}
+    public LocalDateTime getTimeOutLocal(){return LocalDateTime.ofInstant(timeOut, placeOut.getZoneId());}
+    public Instant getTimeOut(){ return timeOut;}
+    public Instant getTimeIn(){return timeIn;}
     public String getId() {return id;}
     public Duration getTimeInAir() {return Duration.between(getTimeOut(), getTimeIn());}
     public int getSeats() {return seats;}
