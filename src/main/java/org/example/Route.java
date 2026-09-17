@@ -8,9 +8,9 @@ import static java.lang.Math.abs;
 
 public class Route{
     private List<Segment> list;
-    public Route(List<Segment> list) throws Exception{
+    public Route(List<Segment> list) throws MyException{
         if(list.isEmpty()){
-            throw new Exception("U can't buy null ticket");
+            throw new MyException("U can't buy null ticket");
         }
         for(int i = 0; i < list.size() - 1; i++){
             Flight current = list.get(i).flight();
@@ -18,10 +18,10 @@ public class Route{
 
 
             if(!current.getPlaceIn().getCiti().equals(next.getPlaceOut().getCiti())){
-                throw new Exception("You can't get flight in another city!");
+                throw new MyException("You can't get flight in another city!");
             }
             if(!current.getTimeIn().isBefore(next.getTimeOut()) || abs(Duration.between(current.getTimeIn(), next.getTimeOut()).toMinutes()) <= 45){
-                throw new Exception("You can't get flight after flight is gone!");
+                throw new MyException("You can't get flight after flight is gone!");
             }
         }
         this.list = new java.util.ArrayList<>(list);
@@ -32,10 +32,13 @@ public class Route{
         return Duration.between(list.getFirst().flight().getTimeOut(), list.getLast().flight().getTimeIn());
     }
 
-    public Duration getLayoverTime(){
-        Duration dur = Duration.ofHours(0);
-        for(Segment f:list){
-            dur = dur.plus(Duration.between(f.flight().getTimeOut(), f.flight().getTimeIn()));
+    public Duration getLayoverTime() {
+        Duration dur = Duration.ZERO;
+        for (int i = 0; i < list.size() - 1; i++) {
+            dur = dur.plus(Duration.between(
+                    list.get(i).flight().getTimeIn(),
+                    list.get(i + 1).flight().getTimeOut()
+            ));
         }
         return dur;
     }
