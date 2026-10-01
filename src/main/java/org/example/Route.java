@@ -8,6 +8,16 @@ import static java.lang.Math.abs;
 
 public class Route{
     private List<Segment> list;
+
+
+    /**
+     * Конструирует объект маршрута и выполняет строгую валидацию цепочки перелетов.
+     * Проверяет связность городов пересадки и минимальное время на транзит.
+     *
+     * @param list        список сегментов перелета, составляющих маршрут
+     * @throws MyException если список пуст, города не совпадают или нарушено время стыковки
+     */
+
     public Route(List<Segment> list) throws MyException{
         if(list.isEmpty()){
             throw new MyException("U can't buy null ticket");
@@ -50,6 +60,14 @@ public class Route{
         }
         return totalFlightTime;
     }
+
+
+
+    /**
+     * Формирует и выводит в консоль подробное текстовое расписание всего маршрута,
+     * включая города отправления/прибытия, локальное время, индикаторы смещения дней (+1 day)
+     * и время в воздухе для каждого отдельного сегмента.
+     */
 
     public void FlyInf() {
         StringBuilder sb = new StringBuilder("Your trip:\n");

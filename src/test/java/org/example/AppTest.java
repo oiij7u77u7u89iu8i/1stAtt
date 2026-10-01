@@ -1,6 +1,8 @@
 package org.example;
 
+import org.example.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -11,6 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Nested
 class AppTest {
 
     private Airport moscow;
@@ -187,4 +190,54 @@ class AppTest {
         booking.cancel();
         assertThrows(MyException.class, booking::cancel);
     }
+
+    @Test
+    void testRouteThrowsWhenNextFlightIsBeforeCurrentArrival() {
+        Instant f1Out = Instant.parse("2026-09-10T10:00:00Z");
+        Instant f1In = Instant.parse("2026-09-10T14:00:00Z");
+        Flight f1 = new Flight(moscow, dubai, f1Out, f1In, 100);
+
+        // Второе отправление (13:00) раньше времени прилета первого (14:00)
+        Instant f2Out = Instant.parse("2026-09-10T13:00:00Z");
+        Instant f2In = Instant.parse("2026-09-10T18:00:00Z");
+        Flight f2 = new Flight(dubai, tokyo, f2Out, f2In, 100);
+
+        assertThrows(MyException.class, () -> new Route(List.of(
+                new Segment(f1, SeatsClass.ECONOMY),
+                new Segment(f2, SeatsClass.ECONOMY)
+        )));
+    }
+
+    @Test
+    void testAirportEqualsAndHashcode() {
+        Airport moscowAlt = new Airport(ZoneId.of("Europe/Moscow"));
+        Airport london = new Airport(ZoneId.of("Europe/London"));
+
+        assertEquals(moscow, moscowAlt);
+        assertNotEquals(moscow, london);
+        assertEquals(moscow.hashCode(), moscowAlt.hashCode());
+    }
+
+    @Test
+    void testSeatsClassEnumIntegrity() {
+        List<SeatsClass> classes = SeatsClass.getClasses();
+        assertEquals(3, classes.size());
+        assertTrue(classes.contains(SeatsClass.FIRST));
+        assertTrue(classes.contains(SeatsClass.BUSINESS));
+        assertTrue(classes.contains(SeatsClass.ECONOMY));
+    }
+
+    @Test
+    void testBookingWithNullDiscountThrows() throws Exception {
+        Instant out = Instant.parse("2026-09-10T10:00:00Z");
+        Instant in = Instant.parse("2026-09-10T12:00:00Z");
+        Flight f = new Flight(moscow, dubai, out, in, 100);
+        Route route = new Route(List.of(new Segment(f, SeatsClass.ECONOMY)));
+
+        assertThrows(NullPointerException.class, () -> {
+            new Booking(route, "Иван", null);
+        });
+    }
+
 }
+

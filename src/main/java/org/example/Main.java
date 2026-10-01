@@ -29,26 +29,53 @@ public class Main {
                 System.out.println((i + 1) + ". " + airports.get(i).getZoneId());
             }
 
-            System.out.print("\nВыберите номер пункта отправления: ");
-            int originIdx = Integer.parseInt(scanner.nextLine().trim()) - 1;
-            Airport origin = airports.get(originIdx);
+            Airport origin = null;
+
+            while (true){
+                try{
+                    System.out.print("\nВыберите номер пункта отправления: ");
+                    int originIdx = scanner.nextInt() - 1;
+                    if(originIdx < airports.size() && originIdx >= 0) {
+                        origin = airports.get(originIdx);
+                        break;
+                    }
+                }catch (Exception e){
+                    System.out.println("Введите число");
+                    scanner.nextLine();
+                }
+            }
 
             Airport destination = null;
-            boolean xd = true;
-            while (xd) {
-                System.out.print("Выберите номер пункта назначения: ");
-                int destIdx = Integer.parseInt(scanner.nextLine().trim()) - 1;
-                destination = airports.get(destIdx);
-
-                if (origin.equals(destination)) {
-                    System.out.println("Пункт отправления и назначения совпадают!");
-                } else {
-                    xd = false;
+            while (true) {
+                try{
+                    System.out.print("Выберите номер пункта назначения: ");
+                    int destIdx = scanner.nextInt() - 1;
+                    Airport selectedDestination = airports.get(destIdx);
+                    if (origin.equals(selectedDestination)) {
+                        System.out.println("Пункт отправления и назначения совпадают!");
+                    }else{
+                        destination = selectedDestination;
+                        break;
+                    }
+                }catch (Exception e){
+                    System.out.println("Введите число < " + airports.size());
+                    scanner.nextLine();
+                }finally {
+                    System.out.println("Пункт выбран");
                 }
             }
 
             usersRoute = searchRoute(origin, destination, flights);
+            System.out.println("\nМаршрут успешно выбран!");
+
+            Booking booking = new Booking(usersRoute, name, new StandardDiscount());
+
             System.out.println("\nМаршрут успешно выбран и сохранен!");
+            System.out.println("Статус бронирования: " + booking.getStatus());
+            System.out.println("Итоговая стоимость: " + booking.getPrice() + " у.е.");
+            System.out.println();
+
+            usersRoute.FlyInf();
 
         } catch (MyException e) {
             System.err.println("Ошибка валидации маршрута или бронирования: " + e.getMessage());
@@ -87,6 +114,21 @@ public class Main {
         return list;
     }
 
+
+
+
+    /**
+     * Выполняет поиск доступных авиамаршрутов между заданными аэропортами.
+     * Находит прямые рейсы и транзитные варианты с одной пересадкой,
+     * валидируя время стыковки (от 45 минут до 24 часов).
+     *
+     * @param origin      аэропорт отправления выбранный пользователем
+     * @param destination аэропорт назначения выбранный пользователем
+     * @param list        общий список всех существующих рейсов в системе
+     * @return            выбранный пользователем и валидированный маршрут
+     * @throws MyException если подходящих рейсов или стыковок не найдено
+     */
+
     public static Route searchRoute(Airport origin, Airport destination, List<Flight> list) throws MyException {
         List<List<Flight>> options = new LinkedList<>();
 
@@ -116,9 +158,9 @@ public class Main {
         System.out.println("\nДоступные маршруты:");
         for (int i = 0; i < options.size(); i++) {
             List<Flight> flights = options.get(i);
-            System.out.print((i + 1) + ". " + flights.getFirst().getPlaceOut().getCiti());
+            System.out.print((i + 1) + ". " + flights.getFirst().getPlaceOut().getCiti() + " " + flights.getFirst().getTimeOut());
             for (Flight f : flights) {
-                System.out.print(" -> " + f.getPlaceIn().getCiti());
+                System.out.print(" -> " + f.getPlaceIn().getCiti() + " " + flights.getFirst().getTimeOut());
             }
             System.out.println();
         }

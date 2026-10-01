@@ -3,6 +3,7 @@ package org.example;
 
 import java.time.*;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Airport {
     private static int airportCount = 0;
@@ -27,5 +28,13 @@ public class Airport {
     public static void createFlight(Airport placeOut, Airport placeIn, Instant timeOut, Instant timeIn, int seats) {
         Flight current = new Flight(placeOut, placeIn, timeOut, timeIn, seats);
         placeOut.flightOut.put(current.getId(), current);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Airport airport = (Airport) o;
+        return Objects.equals(this.id, airport.id);
     }
 }
