@@ -1,51 +1,176 @@
 package org.example;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.List;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
+        String name;
+        Route usersRoute;
         try {
             Airport moscow = new Airport(ZoneId.of("Europe/Moscow"));
             Airport dubai = new Airport(ZoneId.of("Asia/Dubai"));
             Airport tokyo = new Airport(ZoneId.of("Asia/Tokyo"));
+            Airport newYork = new Airport(ZoneId.of("America/New_York"));
+            Airport london = new Airport(ZoneId.of("Europe/London"));
+            Airport paris = new Airport(ZoneId.of("Europe/Paris"));
 
-            Instant flight1Out = Instant.parse("2026-09-05T14:00:00Z");
-            Instant flight1In = Instant.parse("2026-09-05T19:30:00Z");
-            Flight f1 = new Flight(moscow, dubai, flight1Out, flight1In, 180);
+            List<Airport> airports = List.of(moscow, dubai, tokyo, newYork, london, paris);
+            List<Flight> flights = generateFlights(moscow, dubai, tokyo, newYork, london, paris);
 
-            Instant flight2Out = Instant.parse("2026-09-05T21:30:00Z");
-            Instant flight2In = Instant.parse("2026-09-06T07:00:00Z");
-            Flight f2 = new Flight(dubai, tokyo, flight2Out, flight2In, 250);
-            
-            Segment s1 = new Segment(f1, SeatsClass.ECONOMY);
-            Segment s2 = new Segment(f2, SeatsClass.BUSINESS);
+            System.out.println("Enter your name: ");
+            Scanner scanner = new Scanner(System.in);
+            name = scanner.nextLine();
 
-            Route route = new Route(List.of(s1, s2));
-            route.FlyInf();
+            System.out.println("\nДоступные аэропорты:");
+            for (int i = 0; i < airports.size(); i++) {
+                System.out.println((i + 1) + ". " + airports.get(i).getZoneId());
+            }
 
-            System.out.println("Суммарное время в воздухе: " + route.getFlightTime().toHours() + "ч " + route.getFlightTime().toMinutesPart() + "м");
-            System.out.println("Суммарное время пересадок: " + route.getLayoverTime().toHours() + "ч " + route.getLayoverTime().toMinutesPart() + "м");
-            System.out.println("Всего времени в пути: " + route.getAllTime().toHours() + "ч " + route.getAllTime().toMinutesPart() + "м\n");
+            System.out.print("\nВыберите номер пункта отправления: ");
+            int originIdx = Integer.parseInt(scanner.nextLine().trim()) - 1;
+            Airport origin = airports.get(originIdx);
 
-            DiscountStrategy standardTariff = new StandardDiscount();
-            DiscountStrategy studentTariff = new StudentDiscount();
+            Airport destination = null;
+            boolean xd = true;
+            while (xd) {
+                System.out.print("Выберите номер пункта назначения: ");
+                int destIdx = Integer.parseInt(scanner.nextLine().trim()) - 1;
+                destination = airports.get(destIdx);
 
-            Booking booking1 = new Booking(route, "Иван Иванов", standardTariff);
-            Booking booking2 = new Booking(route, "Петр Смирнов (Студент)", studentTariff);
+                if (origin.equals(destination)) {
+                    System.out.println("Пункт отправления и назначения совпадают!");
+                } else {
+                    xd = false;
+                }
+            }
 
-            System.out.println("Пассажир: " + booking1.getName() + " | Статус: " + booking1.getStatus() + " | К оплате: " + booking1.getPrice());
-            System.out.println("Пассажир: " + booking2.getName() + " | Статус: " + booking2.getStatus() + " | К оплате: " + booking2.getPrice());
-
-            booking1.cancel();
-            System.out.println("После отмены статус: " + booking1.getStatus());
+            usersRoute = searchRoute(origin, destination, flights);
+            System.out.println("\nМаршрут успешно выбран и сохранен!");
 
         } catch (MyException e) {
             System.err.println("Ошибка валидации маршрута или бронирования: " + e.getMessage());
-        } catch (Exception e
-        ) {
+        } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static List<Flight> generateFlights(Airport mow, Airport dxb, Airport nrt,
+                                                Airport jfk, Airport lhr, Airport cdg) {
+        List<Flight> list = new ArrayList<>();
+
+        list.add(new Flight(mow, dxb, Instant.parse("2026-09-01T08:00:00Z"), Instant.parse("2026-09-01T13:30:00Z"), 220));
+        list.add(new Flight(mow, dxb, Instant.parse("2026-09-01T14:00:00Z"), Instant.parse("2026-09-01T19:30:00Z"), 240));
+        list.add(new Flight(mow, lhr, Instant.parse("2026-09-01T07:00:00Z"), Instant.parse("2026-09-01T11:00:00Z"), 260));
+        list.add(new Flight(mow, cdg, Instant.parse("2026-09-01T10:00:00Z"), Instant.parse("2026-09-01T14:00:00Z"), 230));
+        list.add(new Flight(dxb, nrt, Instant.parse("2026-09-01T16:00:00Z"), Instant.parse("2026-09-02T01:30:00Z"), 350));
+        list.add(new Flight(dxb, nrt, Instant.parse("2026-09-01T22:30:00Z"), Instant.parse("2026-09-02T08:00:00Z"), 320));
+        list.add(new Flight(dxb, lhr, Instant.parse("2026-09-01T16:30:00Z"), Instant.parse("2026-09-01T23:30:00Z"), 290));
+        list.add(new Flight(dxb, jfk, Instant.parse("2026-09-02T02:00:00Z"), Instant.parse("2026-09-02T16:00:00Z"), 550));
+
+        list.add(new Flight(lhr, jfk, Instant.parse("2026-09-01T14:00:00Z"), Instant.parse("2026-09-01T22:00:00Z"), 380));
+        list.add(new Flight(lhr, jfk, Instant.parse("2026-09-02T10:00:00Z"), Instant.parse("2026-09-02T18:00:00Z"), 410));
+        list.add(new Flight(lhr, cdg, Instant.parse("2026-09-01T13:00:00Z"), Instant.parse("2026-09-01T14:15:00Z"), 90));
+        list.add(new Flight(lhr, cdg, Instant.parse("2026-09-01T18:00:00Z"), Instant.parse("2026-09-01T19:15:00Z"), 95));
+        list.add(new Flight(lhr, nrt, Instant.parse("2026-09-01T15:00:00Z"), Instant.parse("2026-09-02T03:00:00Z"), 500));
+        list.add(new Flight(cdg, jfk, Instant.parse("2026-09-01T16:30:00Z"), Instant.parse("2026-09-02T01:00:00Z"), 420));
+        list.add(new Flight(cdg, dxb, Instant.parse("2026-09-02T08:00:00Z"), Instant.parse("2026-09-02T15:00:00Z"), 260));
+
+        list.add(new Flight(nrt, jfk, Instant.parse("2026-09-02T11:00:00Z"), Instant.parse("2026-09-02T23:00:00Z"), 490));
+        list.add(new Flight(nrt, dxb, Instant.parse("2026-09-02T12:00:00Z"), Instant.parse("2026-09-02T21:30:00Z"), 340));
+
+        list.add(new Flight(jfk, lhr, Instant.parse("2026-09-02T20:00:00Z"), Instant.parse("2026-09-03T03:00:00Z"), 360));
+        list.add(new Flight(jfk, cdg, Instant.parse("2026-09-02T22:00:00Z"), Instant.parse("2026-09-03T05:30:00Z"), 390));
+
+        return list;
+    }
+
+    public static Route searchRoute(Airport origin, Airport destination, List<Flight> list) throws MyException {
+        List<List<Flight>> options = new LinkedList<>();
+
+        for (Flight fly : list) {
+            if (fly.getPlaceOut().equals(origin) && fly.getPlaceIn().equals(destination)) {
+                options.add(Collections.singletonList(fly));
+            }
+        }
+
+        for (Flight f1 : list) {
+            if (f1.getPlaceOut().equals(origin)) {
+                for (Flight f2 : list) {
+                    if (f1.getPlaceIn().equals(f2.getPlaceOut()) && f2.getPlaceIn().equals(destination)) {
+                        long layoverMinutes = Duration.between(f1.getTimeIn(), f2.getTimeOut()).toMinutes();
+                        if (layoverMinutes >= 45 && layoverMinutes <= 24 * 60) {
+                            options.add(List.of(f1, f2));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (options.isEmpty()) {
+            throw new MyException("Доступных маршрутов не найдено.");
+        }
+
+        System.out.println("\nДоступные маршруты:");
+        for (int i = 0; i < options.size(); i++) {
+            List<Flight> flights = options.get(i);
+            System.out.print((i + 1) + ". " + flights.getFirst().getPlaceOut().getCiti());
+            for (Flight f : flights) {
+                System.out.print(" -> " + f.getPlaceIn().getCiti());
+            }
+            System.out.println();
+        }
+
+        int choice = -1;
+        int maxChoice = options.size();
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.print("\nВыберите маршрут (1 - " + maxChoice + "): ");
+            if (sc.hasNextInt()) {
+                choice = sc.nextInt();
+                if (choice >= 1 && choice <= maxChoice) {
+                    break;
+                } else {
+                    System.out.println("Ошибка: введите число от 1 до " + maxChoice);
+                }
+            } else {
+                System.out.println("Ошибка: вы ввели не число.");
+                sc.next();
+            }
+        }
+
+        List<Flight> chosenFlights = options.get(choice - 1);
+        SeatsClass selectedClass = selectClass();
+
+        List<Segment> finalSegments = new ArrayList<>();
+        for (Flight f : chosenFlights) {
+            finalSegments.add(new Segment(f, selectedClass));
+        }
+
+        return new Route(finalSegments);
+    }
+
+    public static SeatsClass selectClass() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\nВыберите класс обслуживания:");
+        System.out.println("1. FIRST\n2. BUSINESS\n3. ECONOMY");
+
+        while (true) {
+            System.out.print("Введите номер (1-3): ");
+            if (sc.hasNextInt()) {
+                int cur = sc.nextInt();
+                if (cur >= 1 && cur <= 3) {
+                    return SeatsClass.getClasses().get(cur - 1);
+                } else {
+                    System.out.println("Ошибка: Выберите от 1 до 3");
+                }
+            } else {
+                System.out.println("Ошибка: введите корректное число.");
+                sc.next();
+            }
         }
     }
 }

@@ -22,10 +22,8 @@ public class Booking {
         if (this.status == BookingStatus.CANCELLED) {
             throw new MyException("Бронирование уже отменено!");
         }
-
-        // Проверка: нельзя отменить бронь, если первый рейс уже улетел относительно часов
         if (ProjectClock.now().isAfter(route.getList().getFirst().flight().getTimeOut())) {
-            throw new MyException("Нельзя отменить бронь: рейс уже улетел!");
+            throw new MyException("рейс уже улетел!");
         }
 
         this.status = BookingStatus.CANCELLED;
